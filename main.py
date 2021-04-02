@@ -23,13 +23,12 @@ def pick_random_word(word_in_underscore) -> str:
 
     # Display word for user to see
     display_word = ' '.join(word_in_underscore)
-    print(display_word)
     print(chosen_word)
 
-    return chosen_word
+    return chosen_word, display_word
 
 
-def game_end(flag: bool) -> bool:
+def play_again(flag: bool) -> bool:
     """Asks user if he/she wants to play again.
 
     Args:
@@ -61,51 +60,86 @@ def game_end(flag: bool) -> bool:
 
 def main():
 
-    tries = 0  # Keeps track of the amount of wrong guesses
-    word_underscore = []  # The word in underscores
+    store_guesses: List[str] = []
+    wrong_guesses: int = 0
 
-    random_word = pick_random_word(word_underscore)  # Chooses a random word
+    word_to_underscore: List[str] = []  # The word in underscores
 
-    # Game Logic
+    random_word, display_word = pick_random_word(
+        word_to_underscore)  # Chooses a random word
+
     game_running = True
     while game_running:
 
-        guesses = []  # Stores all user guesses
-
         # Check if all underscores have been converted into a letter
-        if '_' not in word_underscore:
-            print('Win')
+        if '_' not in word_to_underscore:
+            print('\nWin')
 
             # Determine whether the player wants to play again or not
-            game_running = game_end(game_running)
+            game_running = play_again(game_running)
 
             # Value of the flag determines whether the game ends or restarts
             if not game_running:
                 break
             elif game_running:
-                random_word = pick_random_word(word_underscore)
+                wrong_guesses = 0
+
+                word_to_underscore.clear()  # Reset list
+
+                # Choose a new word for the new game
+                random_word, display_word = pick_random_word(
+                    word_to_underscore)
                 continue
 
-        # Let the user guess
-        user_guess = input('Guess the word or letter: ')
+        # Display updated word
+        print(' '.join(word_to_underscore))
+
+        # Check if wrong_guesses == 5
+        if wrong_guesses == 6:
+            print(f'Tries: {wrong_guesses}/6')
+            print(f'Word is: {random_word}')
+
+            # Determine whether the player wants to play again or not
+            game_running = play_again(game_running)
+
+            # Value of the flag determines whether the game ends or restarts
+            if not game_running:
+                break
+            elif game_running:
+                wrong_guesses = 0
+
+                word_to_underscore.clear()  # Reset list
+
+                # Choose a new word for the new game
+                random_word, display_word = pick_random_word(
+                    word_to_underscore)
+                continue
+
+        # Ask for user's guess
+        user_guess: str = input('Guess the word or letter: ')
         user_guess = user_guess.upper()
 
-        guesses.append(user_guess)  # Store the user's guesses
+        store_guesses.append(user_guess)  # Store the user's guesses
 
         if user_guess == random_word:
             # If the guess is a word
-
             print(random_word)
             print('Win')
 
             # Determine whether the player wants to play again or not
-            game_running = game_end(game_running)
+            game_running: bool = play_again(game_running)
 
             # Value of the flag determines whether the game ends or restarts
             if not game_running:
                 break
             elif game_running:
-                random_word = pick_random_word(word_underscore)
+                wrong_guesses = 0
+
+                word_to_underscore.clear()  # Reset list
+
+                # Choose a new word for the new game
+                random_word, display_word = pick_random_word(
+                    word_to_underscore)
                 continue
 
         if user_guess in random_word:
@@ -119,18 +153,14 @@ def main():
                     letter_occur_index.append(index)
 
             # Iterate and change underscore to letter guessed
-            for index, element in enumerate(word_underscore):
+            for index, element in enumerate(word_to_underscore):
                 if index in letter_occur_index:
-                    word_underscore[index] = user_guess
-
-            # Display updated word
-            print(' '.join(word_underscore))
+                    word_to_underscore[index] = user_guess
 
         elif user_guess not in random_word:
-            tries += 1
-            print(f'Tries: {tries}')
+            wrong_guesses += 1
+            print(f'Tries: {wrong_guesses}')
             print('Letter not in word\n')
-            continue
 
     print('Thank you for playing.')
 
